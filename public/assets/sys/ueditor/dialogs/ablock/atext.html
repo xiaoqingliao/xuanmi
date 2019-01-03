@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script type="text/javascript" src="../internal.js"></script>
+    <script type="text/javascript" src="jquery.js"></script>
+    <style type="text/css">
+        *{margin:0;padding:0;color: #838383;}
+        table{font-size: 12px;margin: 10px;line-height: 30px}
+        .txt{width:600px;height:22px;line-height:22px;border:1px solid #d7d7d7;}
+        .textarea{width:700px;height:300px;line-height:22px;border:1px solid #d7d7d7;}
+    </style>
+</head>
+<body>
+    <input class="txt" id="image" type="hidden" />
+    <table>
+        <tr>
+            <td><label for="text"> 内容</label></td>
+            <td><textarea class="textarea" id="text" type="text"></textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2" id="msg"></td>
+        </tr>
+    </table>
+    <script type="text/javascript">
+
+    function handleDialogOk(){
+        var text = $G('text').value;
+        var obj = {
+            atext:atext,
+            text:text
+        };
+        editor.execCommand('atext', obj );
+        dialog.close();
+    }
+
+    dialog.onok = handleDialogOk;
+
+    var path = editor.selection.getStartElementPath();
+    var modify = false;
+    var atext = null;
+    for(var i=0;i<path.length;i++){
+        var node = path[i];
+        if($(node).is('div.atext')){
+            modify = true;
+            atext = node;
+            $('#text').val($(node).html().replace(/<br([^>]*?)>/g, '\n'));
+            break;
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script type="text/javascript" src="../internal.js"></script>
+    <script type="text/javascript" src="jquery.js"></script>
+    <style type="text/css">
+        *{margin:0;padding:0;color: #838383;}
+        table{font-size: 12px;margin: 10px;line-height: 30px}
+        .txt{width:400px;height:22px;line-height:22px;border:1px solid #d7d7d7;}
+    </style>
+</head>
+<body>
+    <input class="txt" id="image" type="hidden" />
+    <table>
+        <tr>
+            <td width="40"><label for="field"> 标题</label></td>
+            <td><input class="txt" id="field" type="text" /></td>
+        </tr>
+        <tr>
+            <td width="40"><label for="value"> 内容</label></td>
+            <td><input class="txt" id="value" type="text" /></td>
+        </tr>
+    </table>
+    <script type="text/javascript">
+    var afieldvalue = null;
+    function handleDialogOk(){
+        var field = $('#field').val();
+        var value = $('#value').val();
+        var obj = {
+            afieldvalue:afieldvalue,
+            field:field,
+            value:value
+        };
+        editor.execCommand('afieldvalue',obj );
+        dialog.close();
+    }
+
+    dialog.onok = handleDialogOk;
+    var path = editor.selection.getStartElementPath();
+    var modify = false;
+    for(var i=0;i<path.length;i++){
+        var node = path[i];
+        if($(node).is('dl.afieldvalue')){
+            modify = true;
+            afieldvalue = node;
+            $('#field').val($('dt', node).text());
+            $('#value').val($('dd', node).text());
+            break;
+        }
+    }
+</script>
+</body>
+</html>

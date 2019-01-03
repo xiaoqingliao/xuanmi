@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script type="text/javascript" src="../internal.js"></script>
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="swfupload.js"></script>
+    <style type="text/css">
+        *{margin:0;padding:0;color: #838383;}
+        table{font-size: 12px;margin: 10px;line-height: 30px}
+        .txt{width:600px;height:22px;line-height:22px;border:1px solid #d7d7d7;}
+        .textarea{width:600px;height:130px;line-height:22px;border:1px solid #d7d7d7;}
+        label{padding-right:5px}
+        .image_container {}
+        .image_container .image_item{position:relative;float:left;margin-right:10px;margin-bottom:5px;padding:5px;border:1px solid #eee;height:80px;text-align:center;}
+        .image_container .image_item .img{float:left;width:80px;height:80px;text-align:center;}
+        .image_container .image_item textarea{float:left;margin-left:5px;width:130px;height:80px;border:1px solid #ccc;outline:none;line-height:20px;}
+        .image_container .image_item .remove{position:absolute;right:-10px;top:-10px;}
+        .SWFUpload{position:absolute;}
+        .btn_upload{border:1px solid #ccc;background-color:#fff;line-height:24px;height:24px;width:80px;}
+    </style>
+</head>
+<body>
+    <input class="txt" id="image" type="hidden" />
+    <table>
+        <tr>
+            <td width="40">排版</td>
+            <td>
+                <label><input type="radio" name="layout" value="left" checked="checked" /> 居左</label>
+                <label><input type="radio" name="layout" value="right" /> 居右</label>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="image"> 图片</label></td>
+            <td><span id="spanButtonPlaceHolder"></span><button class="btn_upload">上传图片</button></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><div class="image_container"></div></td>
+        </tr>
+        <tr>
+            <td><label for="text"> 内容</label></td>
+            <td><textarea class="textarea" id="text" type="text"></textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2" id="msg"></td>
+        </tr>
+    </table>
+    <script type="text/javascript">
+    function handleDialogOk(){
+        var layout = $('input[name="layout"]:checked').val();
+        var img = null;
+        var title = null;
+        var text = $G('text').value;
+
+        $('.image_container .image_item:first').each(function(){
+            var item = $(this);
+            var path = $('img', item).attr('src');
+            var alt = $('textarea', item).val();
+
+            img = path;
+            title = alt;
+        });
+        
+        var obj = {
+            apictext:apictext,
+            layout:layout,
+            img:img,
+            title:title,
+            text:text
+        };
+        editor.execCommand('apictext',obj );
+        dialog.close();
+    }
+
+    dialog.onok = handleDialogOk;
+
+    utils.domReady(function(){
+        var settings = {
+            upload_url:editor.options.imageUrl,           //附件上传服务器地址
+            file_post_name:editor.options.imageFieldName || 'upfile',      //向后台提交的表单名
+            flash_url:"swfupload.swf",
+            post_params:{"PHPSESSID":''}, //解决session丢失问题
+            file_size_limit:"1 GB",                                 //文件大小限制，此处仅是前端flash选择时候的限制，具体还需要和后端结合判断
+            file_types:"*.*",                                         //允许的扩展名，多个扩展名之间用分号隔开，支持*通配符
+            file_types_description:"All Files",                      //扩展名描述
+            file_upload_limit:20,                                   //单次可同时上传的文件数目
+            file_queue_limit:0,                                      //队列中可同时上传的文件数目
+            custom_settings:{                                         //自定义设置，用户可在此向服务器传递自定义变量
+                progressTarget:"fsUploadProgress",
+                startUploadId:"startUpload"
+            },
+            debug:false,
+            // 按钮设置
+            button_image_url:"1",
+            button_width:"80",
+            button_height:"20",
+            button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT,
+            button_placeholder_id:"spanButtonPlaceHolder",
+            button_text:'',
+            button_text_style:"",
+            button_text_left_padding:10,
+            file_queued_handler:function(file){
+                this.startUpload();
+            },
+            upload_start_handler:function(file){
+                
+            },
+            upload_progress_handler:function(file, completed, total) {
+                var c = (completed / total * 100).toFixed(0).toString() + "%";
+                //status_place.show().text(c);
+            },
+            upload_error_handler:function(file, code, message) {
+                alert('上传失败，请稍后再试。');
+            },
+            upload_success_handler:function (file, serverData) {
+                try{
+                    var info = eval("("+serverData+")");
+                }catch(e){}
+                if(info.state=="SUCCESS"){
+                    $G('image').value = info.url;
+                    append_image(info.url);
+                }else{
+                    
+                }
+                var stats = this.getStats();
+                if(stats.files_queued > 0){
+                    this.startUpload();
+                }
+                
+            },
+            upload_complete_handler:function(){
+            },
+            queue_complete_handler:function(){
+            }
+        };
+        swfupload = new SWFUpload( settings );
+    });
+    function append_image(url, alt){
+        var image_container = $('.image_container').empty();
+        alt = alt || '';
+        var image_item = $('<div class="image_item"><div class="img"><img src="' + url + '" width="80" height="80" /></div><textarea>'+alt+'</textarea><div class="remove"><img src="delete.png" /></div></div>');
+        image_item.appendTo(image_container);
+        $('img', image_item).one('load', function() {
+            var _this = this;
+            var img = new Image();
+            img.src = this.src;
+            img.onload = function(){
+                var w = img.width;
+                var h = img.height;
+                console.log([w, h]);
+                if(w > h){
+                    $(_this).removeAttr('height');
+                }else if(w < h){
+                    $(_this).removeAttr('width');
+                }
+            }
+        }).each(function() {
+            if(this.complete){
+                $(this).load();
+            }
+        });
+    }
+
+    $(document).on('click', '.remove', function(){
+        $(this).closest('.image_item').animate({opacity:0}, 200, function(){$(this).remove();});
+    });
+
+    var path = editor.selection.getStartElementPath();
+    var modify = false;
+    var apictext = null;
+    for(var i=0;i<path.length;i++){
+        var node = path[i];
+        if($(node).is('div.apictext')){
+            modify = true;
+            apictext = node;
+
+            var layout = 'left';
+            if($(node).hasClass('apictext-layout-left')){
+                layout = 'left';
+            }else if($(node).hasClass('apictext-layout-right')){
+                layout = 'right';
+            }
+            $('input[name="layout"][value="'+layout+'"]').attr('checked', 'checked');
+
+            $('#text').val($('.apictext-text', node).text());
+
+            $('.apictext-image', node).each(function(){
+                append_image($('img', this).attr('src'), $('.apictext-title', this).text());
+            });
+
+            break;
+        }
+    }
+</script>
+</body>
+</html>

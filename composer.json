@@ -1,0 +1,57 @@
+{
+	"name" : "zccrm",
+	"description" : "泽诚客户项目进度管理",
+	"keywords" : [
+		"crm"
+	],
+	"license" : "MIT",
+	"type" : "project",
+	"require" : {
+		"php" : ">=5.6.4",
+		"laravel/framework" : "5.4.*",
+		"laravelcollective/html" : "~5.0",
+		"laravel/tinker" : "~1.0",
+		"jenssegers/agent" : "2.6.*",
+		"erusev/parsedown" : "1.7.*",
+		"intervention/image" : "2.*",
+		"simplesoftwareio/simple-qrcode" : "~1",
+		"maatwebsite/excel" : "2.1.*",
+		"tymon/jwt-auth" : "~1.0.0-rc.1",
+		"guzzlehttp/guzzle" : "~6.0"
+	},
+	"require-dev" : {
+		"fzaninotto/faker" : "~1.4",
+		"mockery/mockery" : "0.9.*",
+		"phpunit/phpunit" : "~5.0"
+	},
+	"autoload" : {
+		"classmap" : [
+			"database"
+		],
+		"files" : [
+			"app/helper.php"
+		],
+		"psr-4" : {
+			"App\\" : "app/",
+			"Tests\\" : "tests/",
+			"Thrift\\" : "lib/Thrift/",
+			"videomod\\" : "videomod/"
+		}
+	},
+	"scripts" : {
+		"post-root-package-install" : "php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+		"post-create-project-cmd" : "php artisan key:generate",
+		"post-install-cmd" : [
+			"Illuminate\\Foundation\\ComposerScripts::postInstall",
+			"php artisan optimize"
+		],
+		"post-update-cmd" : [
+			"Illuminate\\Foundation\\ComposerScripts::postUpdate",
+			"php artisan optimize"
+		]
+	},
+	"config" : {
+		"preferred-install" : "dist",
+		"sort-packages" : true
+	}
+}
